@@ -11,7 +11,7 @@ env:
   PYTHON_VERSION: 3.10.6
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -74,8 +74,3 @@ jobs:
         run: |
           cd ${{ env.API_DIRECTORY }}
           echo "Performance step - Add your performance commands here"
-
-      - name: 📦 Run deployment
-        run: |
-          cd ${{ env.API_DIRECTORY }}
-          echo "Deployment step - Add your deployment commands here"
