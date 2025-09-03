@@ -1,0 +1,23 @@
+[project]
+name = "authentication-api"
+version = "0.1.0"
+description = "API for authentication using OAuth2 and OpenID Connect"
+authors = [
+    { name = "Jomar Júnior de Souza Pereira", email = "jomarjunior@poli.ufrj.br" },
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.black]
+line-length = 100
+target-version = ['py39']
+
+[tool.pytest.ini_options]
+addopts = "--maxfail=5 --disable-warnings -q"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["api"]
