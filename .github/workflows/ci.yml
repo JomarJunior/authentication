@@ -34,12 +34,12 @@ jobs:
       - name: 🎨 Run formatting
         run: |
           cd ${{ env.API_DIRECTORY }}
-          poetry run black .
+          poetry run black src --check
             
       - name: 🕵️ Run linting
         run: |
           cd ${{ env.API_DIRECTORY }}
-          poetry run pylint
+          poetry run pylint src
 
       - name: 🏗️ Run build
         run: |

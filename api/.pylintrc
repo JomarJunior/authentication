@@ -1,5 +1,18 @@
 [MASTER]
 ignore=venv
+ignore-patterns=(.)*_test\.py,test_(.)*\.py
+module-naming-style=PascalCase
+const-naming-style=UPPER_CASE
+class-naming-style=PascalCase
+function-naming-style=PascalCase
+method-naming-style=PascalCase
+attr-naming-style=camelCase
+argument-naming-style=camelCase
+variable-naming-style=camelCase
+class-attribute-naming-style=camelCase
+class-const-naming-style=UPPER_CASE
+inlinevar-naming-style=camelCase
+good-names=src
 
 [MESSAGES CONTROL]
 disable=C0114,C0115,C0116
