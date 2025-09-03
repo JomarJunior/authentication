@@ -74,8 +74,8 @@ The stack consists of a frontend application (React) to render the Login and Reg
     > These tools were selected to enforce coding standards and best practices across the codebase, helping to maintain code quality and consistency.
   - 🛠️ Formatter: *Black + Prettier*
     > Prettier was chosen for its opinionated code formatting capabilities, ensuring a consistent code style across the frontend codebase.
-  - 📦 Package Manager: *pip + npm*
-    > Pip is used for managing Python packages, while npm is used for managing JavaScript packages. This combination allows for efficient dependency management across the entire stack.
+  - 📦 Package Manager: *poetry + npm*
+    > Poetry is used for managing Python packages, while npm is used for managing JavaScript packages. This combination allows for efficient dependency management across the entire stack.
   - 🚀 Deployment: *Docker + Kubernetes*
     > Docker is used to containerize applications, ensuring consistent environments across development, testing, and production. Kubernetes is used for orchestrating and managing containerized applications at scale.
   - ✅ CI/CD: *GitHub Actions*
