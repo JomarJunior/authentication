@@ -28,14 +28,17 @@ jobs:
         
       - name: Install dependencies
         run: |
+          cd ${{ env.API_DIRECTORY }}
           poetry install
 
       - name: 🎨 Run formatting
         run: |
+          cd ${{ env.API_DIRECTORY }}
           poetry run black .
             
       - name: 🕵️ Run linting
         run: |
+          cd ${{ env.API_DIRECTORY }}
           poetry run pylint api
 
       - name: 🏗️ Run build
@@ -44,20 +47,25 @@ jobs:
             
       - name: 🧪 Run unit tests
         run: |
+          cd ${{ env.API_DIRECTORY }}
           poetry run pytest tests/unit
             
       - name: 🔗 Run integration tests
         run: |
+          cd ${{ env.API_DIRECTORY }}
           poetry run pytest tests/integration
 
       - name: 🔒 Run security tests
         run: |
+          cd ${{ env.API_DIRECTORY }}
           echo "Security step - Add your security commands here"
 
       - name: 🚀 Run performance tests
         run: |
+          cd ${{ env.API_DIRECTORY }}
           echo "Performance step - Add your performance commands here"
 
       - name: 📦 Run deployment
         run: |
+          cd ${{ env.API_DIRECTORY }}
           echo "Deployment step - Add your deployment commands here"
