@@ -778,9 +778,6 @@ The project will follow the Test Driven Development (TDD) principles, ensuring t
   - Maintaining versioned backups of the application and database to restore previous states.
   - Thorough testing of rollback procedures to ensure they work as intended.
 
-🧩 Appendices
-===
-
 📕 Glossary
 ---
 
