@@ -72,7 +72,7 @@ The stack consists of a frontend application (React) to render the Login and Reg
     > These tools were chosen for their ease of use and ability to facilitate comprehensive testing of both frontend and backend components.
   - 📝 Linter: *Pylint + ESLint*
     > These tools were selected to enforce coding standards and best practices across the codebase, helping to maintain code quality and consistency.
-  - 🛠️ Formatter: *Prettier*
+  - 🛠️ Formatter: *Black + Prettier*
     > Prettier was chosen for its opinionated code formatting capabilities, ensuring a consistent code style across the frontend codebase.
   - 📦 Package Manager: *pip + npm*
     > Pip is used for managing Python packages, while npm is used for managing JavaScript packages. This combination allows for efficient dependency management across the entire stack.
