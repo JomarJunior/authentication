@@ -10,12 +10,8 @@ license = { file = "LICENSE" }
 requires-python = ">=3.10"
 dependencies = [
     "fastapi (>=0.116.1,<0.117.0)",
-    "pytest (>=8.4.1,<9.0.0)",
-    "pylint (>=3.3.8,<4.0.0)",
-    "black (>=25.1.0,<26.0.0)",
     "pydantic (>=2.11.7,<3.0.0)",
     "sqlalchemy (>=2.0.43,<3.0.0)",
-    "alembic (>=1.16.5,<2.0.0)",
 ]
 
 [tool.black]
@@ -29,3 +25,12 @@ testpaths = ["tests"]
 [tool.coverage.run]
 branch = true
 source = ["api"]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+pylint = "^3.3.8"
+black = "^25.1.0"
+alembic = "^1.16.5"

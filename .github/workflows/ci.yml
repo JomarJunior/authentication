@@ -1,0 +1,63 @@
+name: 🧪 Authentication CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  API_DIRECTORY: api
+  PYTHON_VERSION: 3.10
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Poetry
+        run: |
+          pip install poetry
+        
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: 🎨 Run formatting
+        run: |
+          poetry run black .
+            
+      - name: 🕵️ Run linting
+        run: |
+          poetry run pylint api
+
+      - name: 🏗️ Run build
+        run: |
+          echo "Build step - Add your build commands here"
+            
+      - name: 🧪 Run unit tests
+        run: |
+          poetry run pytest tests/unit
+            
+      - name: 🔗 Run integration tests
+        run: |
+          poetry run pytest tests/integration
+
+      - name: 🔒 Run security tests
+        run: |
+          echo "Security step - Add your security commands here"
+
+      - name: 🚀 Run performance tests
+        run: |
+          echo "Performance step - Add your performance commands here"
+
+      - name: 📦 Run deployment
+        run: |
+          echo "Deployment step - Add your deployment commands here"
