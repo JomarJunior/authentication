@@ -39,7 +39,7 @@ jobs:
       - name: 🕵️ Run linting
         run: |
           cd ${{ env.API_DIRECTORY }}
-          poetry run pylint api
+          poetry run pylint
 
       - name: 🏗️ Run build
         run: |
