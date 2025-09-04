@@ -7,6 +7,21 @@ from src.Shared.Events.Models import EventEmitter
 
 
 class HistoryClass(BaseModel):
+    """
+    HistoryClass is a model that tracks creation and update timestamps.
+    Attributes:
+        createdAt (datetime):
+            The timestamp indicating when the instance was created.
+            Defaults to the current UTC time.
+        updatedAt (datetime):
+            The timestamp indicating when the instance was last updated.
+            Defaults to the current UTC time.
+    Methods:
+        UpdateTimestamp(func):
+            A static method decorator that updates the `updatedAt` timestamp
+            whenever the decorated method is called.
+    """
+
     createdAt: datetime = datetime.now(timezone.utc)
     updatedAt: datetime = datetime.now(timezone.utc)
 
@@ -25,6 +40,34 @@ class HistoryClass(BaseModel):
 
 
 class AuthenticationCredentials(HistoryClass, EventEmitter):
+    """
+    AuthenticationCredentials is a domain model representing user authentication credentials.
+    It includes fields for user identification, username, password hash,
+    and multi-factor authentication (MFA) settings.
+    The class provides methods for creating instances, serializing to and from a database,
+    and updating credentials.
+    Attributes:
+        id (UUID): Unique identifier for the authentication credentials.
+        userId (UUID): Unique identifier for the associated user.
+        username (str): Username of the user, with a minimum length of 3 and a maximum length of 50.
+        passwordHash (str): Hashed password of the user.
+        mfaEnabled (bool): Indicates whether MFA is enabled for the user. Defaults to False.
+        mfaSecret (Optional[str]): Secret key for MFA, if enabled. Defaults to None.
+    Methods:
+        Create(cls, id, userId, username, passwordHash, mfaEnabled=False, mfaSecret=None) -> self:
+            Factory method to create a new AuthenticationCredentials instance.
+        FromDatabase(cls, data: dict) -> self:
+            Factory method to create an AuthenticationCredentials instance from database data.
+        ToDict(self) -> dict:
+            Serialize the AuthenticationCredentials instance to a dictionary.
+        ChangePassword(self, newPasswordHash: str) -> None:
+            Change the password hash and update the timestamp.
+        EnableMFA(self, mfaSecret: str) -> None:
+            Enable MFA, set the MFA secret, and update the timestamp.
+        DisableMFA(self) -> None:
+            Disable MFA, clear the MFA secret, and update the timestamp.
+    """
+
     id: UUID = Field(default_factory=UUID)
     userId: UUID = Field(default_factory=UUID)
     username: str = Field(..., min_length=3, max_length=50)
@@ -135,6 +178,28 @@ class AuthenticationCredentials(HistoryClass, EventEmitter):
 
 
 class Role(HistoryClass, EventEmitter):
+    """
+    Role class represents a role entity in the authentication domain.
+    Attributes:
+        id (UUID):
+            Unique identifier for the role.
+        name (str):
+            Name of the role, with a minimum length of 3 and a maximum length of 50 characters.
+        description (Optional[str]):
+            Optional description of the role.
+    Methods:
+        Create(id: UUID, name: str, description: Optional[str] = None) -> "Role":
+            Factory method to create a new Role instance.
+        FromDatabase(data: dict) -> "Role":
+            Factory method to create a Role instance from database data.
+        ToDict() -> dict:
+            Serialize the Role instance to a dictionary.
+        ChangeDescription(newDescription: Optional[str]) -> None:
+            Change the role's description and emit a RoleDescriptionUpdated event.
+        ChangeName(newName: str) -> None:
+            Change the role's name and emit a RoleNameUpdated event.
+    """
+
     id: UUID = Field(default_factory=UUID)
     name: str = Field(..., min_length=3, max_length=50)
     description: Optional[str] = None
@@ -217,7 +282,32 @@ class Role(HistoryClass, EventEmitter):
         # self.EmitEvent(RoleNameChanged.FromModel(self))
 
 
-class RoleAssignment(HistoryClass, EventEmitter):
+class RoleAssignment(HistoryClass):
+    """
+    RoleAssignment is a domain model representing the assignment of a role to a user.
+    Attributes:
+        id (UUID):
+            The unique identifier for the role assignment.
+        userId (UUID):
+            The unique identifier of the user to whom the role is assigned.
+        roleId (UUID):
+            The unique identifier of the assigned role.
+        createdAt (datetime):
+            The timestamp when the role assignment was created.
+        updatedAt (datetime):
+            The timestamp when the role assignment was last updated.
+    Methods:
+        Create(cls, id: UUID, userId: UUID, roleId: UUID) -> "RoleAssignment":
+            Factory method to create a new RoleAssignment instance.
+        FromDatabase(cls, data: dict) -> "RoleAssignment":
+            Factory method to create a RoleAssignment instance from database data.
+        ToDict(self) -> dict:
+            Serialize the RoleAssignment instance to a dictionary.
+    Note:
+        RoleAssignment instances are typically managed through the User model,
+        which handles adding and removing role assignments and emitting relevant events.
+    """
+
     id: UUID = Field(default_factory=UUID)
     userId: UUID = Field(default_factory=UUID)
     roleId: UUID = Field(default_factory=UUID)
@@ -241,9 +331,6 @@ class RoleAssignment(HistoryClass, EventEmitter):
             createdAt=now,
             updatedAt=now,
         )
-
-        # Emit event for creation if needed
-        # roleAssignment.EmitEvent(RoleAssigned.FromModel(roleAssignment))
 
         return roleAssignment
 
@@ -276,6 +363,58 @@ class RoleAssignment(HistoryClass, EventEmitter):
 
 
 class User(HistoryClass, EventEmitter):
+    """
+    User
+    A domain model representing a user in the authentication system. This class includes
+    attributes and methods for managing user data, such as email, activation status,
+    verification status, authentication credentials, and role assignments. It also provides
+    factory methods for creating instances and serializing/deserializing data.
+    Attributes:
+        id (UUID):
+            Unique identifier for the user.
+        email (str):
+            Email address of the user.
+        isActive (bool):
+            Indicates whether the user is active. Defaults to True.
+        isVerified (bool):
+            Indicates whether the user is verified. Defaults to False.
+        authenticationCredentials (AuthenticationCredentials):
+            Authentication credentials for the user.
+        roleAssignments (list[RoleAssignment]):
+            List of role assignments for the user.
+    Methods:
+        Create(
+                cls,
+                id,
+                email,
+                authenticationCredentials,
+                roleAssignments=None,
+                isActive=True,
+                isVerified=False
+            ) -> "User":
+            Factory method to create a new User instance.
+        FromDatabase(cls, data):
+            Factory method to create a User instance from database data.
+        ToDict(self):
+            Serialize the User instance to a dictionary.
+        Activate(self):
+            Activate the user account.
+        Deactivate(self):
+            Deactivate the user account.
+        Verify(self):
+            Verify the user account.
+        Unverify(self):
+            Unverify the user account.
+        AddRoleAssignment(self, roleAssignment):
+            Add a role assignment to the user.
+        RemoveRoleAssignment(self, roleAssignmentId):
+            Remove a role assignment from the user.
+        ChangeEmail(self, newEmail):
+            Change the user's email address.
+        ClearRoleAssignments(self):
+            Clear all role assignments from the user.
+    """
+
     id: UUID = Field(default_factory=UUID)
     email: str = Field(..., min_length=5, max_length=100)
     isActive: bool = True
