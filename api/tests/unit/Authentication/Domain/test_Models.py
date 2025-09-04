@@ -8,7 +8,6 @@ class TestAuthenticationCredentials:
     @pytest.fixture
     def valid_data_mfa_enabled(self):
         return {
-            "id": "123e4567-e89b-12d3-a456-426614174000",
             "userId": "123e4567-e89b-12d3-a456-426614174001",
             "username": "testuser",
             "passwordHash": "hashed_password",
@@ -19,7 +18,6 @@ class TestAuthenticationCredentials:
     @pytest.fixture
     def valid_data_mfa_disabled(self):
         return {
-            "id": "123e4567-e89b-12d3-a456-426614174002",
             "userId": "123e4567-e89b-12d3-a456-426614174003",
             "username": "testuser2",
             "passwordHash": "hashed_password2",
@@ -42,7 +40,7 @@ class TestAuthenticationCredentials:
 
     def test_create_with_mfa_enabled(self, valid_data_mfa_enabled):
         creds = AuthenticationCredentials.Create(**valid_data_mfa_enabled)
-        assert creds.id == UUID(valid_data_mfa_enabled["id"])
+        assert isinstance(creds.id, UUID)
         assert creds.userId == UUID(valid_data_mfa_enabled["userId"])
         assert creds.username == valid_data_mfa_enabled["username"]
         assert creds.passwordHash == valid_data_mfa_enabled["passwordHash"]
@@ -51,7 +49,7 @@ class TestAuthenticationCredentials:
 
     def test_create_with_mfa_disabled(self, valid_data_mfa_disabled):
         creds = AuthenticationCredentials.Create(**valid_data_mfa_disabled)
-        assert creds.id == UUID(valid_data_mfa_disabled["id"])
+        assert isinstance(creds.id, UUID)
         assert creds.userId == UUID(valid_data_mfa_disabled["userId"])
         assert creds.username == valid_data_mfa_disabled["username"]
         assert creds.passwordHash == valid_data_mfa_disabled["passwordHash"]
@@ -110,7 +108,6 @@ class TestRole:
     @pytest.fixture
     def valid_role_data(self):
         return {
-            "id": "223e4567-e89b-12d3-a456-426614174000",
             "name": "admin",
             "description": "Administrator role",
         }
@@ -127,7 +124,7 @@ class TestRole:
 
     def test_create_role(self, valid_role_data):
         role = Role.Create(**valid_role_data)
-        assert role.id == UUID(valid_role_data["id"])
+        assert isinstance(role.id, UUID)
         assert role.name == valid_role_data["name"]
         assert role.description == valid_role_data["description"]
 
@@ -181,7 +178,6 @@ class TestRoleAssignment:
     @pytest.fixture
     def valid_role_assignment_data(self):
         return {
-            "id": "323e4567-e89b-12d3-a456-426614174000",
             "userId": "323e4567-e89b-12d3-a456-426614174001",
             "roleId": "223e4567-e89b-12d3-a456-426614174000",
         }
@@ -198,7 +194,7 @@ class TestRoleAssignment:
 
     def test_create_role_assignment(self, valid_role_assignment_data):
         assignment = RoleAssignment.Create(**valid_role_assignment_data)
-        assert assignment.id == UUID(valid_role_assignment_data["id"])
+        assert isinstance(assignment.id, UUID)
         assert assignment.userId == UUID(valid_role_assignment_data["userId"])
         assert assignment.roleId == UUID(valid_role_assignment_data["roleId"])
 
@@ -222,13 +218,8 @@ class TestRoleAssignment:
 
 class TestUser:
     @pytest.fixture
-    def valid_user_id(self):
-        return "423e4567-e89b-12d3-a456-426614174000"
-
-    @pytest.fixture
     def valid_authentication_user_data_mfa_enabled(self):
         return {
-            "id": "123e4567-e89b-12d3-a456-426614174000",
             "userId": "423e4567-e89b-12d3-a456-426614174000",
             "username": "testuser",
             "passwordHash": "hashed_password",
@@ -239,7 +230,6 @@ class TestUser:
     @pytest.fixture
     def valid_authentication_user_data_mfa_disabled(self):
         return {
-            "id": "123e4567-e89b-12d3-a456-426614174000",
             "userId": "423e4567-e89b-12d3-a456-426614174000",
             "username": "testuser",
             "passwordHash": "hashed_password",
@@ -248,41 +238,34 @@ class TestUser:
         }
 
     @pytest.fixture
-    def valid_role_assignments_data(self, valid_user_id):
+    def valid_role_assignments_data(self):
         return [
             {
-                "id": "323e4567-e89b-12d3-a456-426614174000",
-                "userId": valid_user_id,
+                "userId": "423e4567-e89b-12d3-a456-426614174000",
                 "roleId": "223e4567-e89b-12d3-a456-426614174000",
             },
             {
-                "id": "323e4567-e89b-12d3-a456-426614174002",
-                "userId": valid_user_id,
+                "userId": "423e4567-e89b-12d3-a456-426614174000",
                 "roleId": "223e4567-e89b-12d3-a456-426614174003",
             },
         ]
 
     @pytest.fixture
-    def valid_user_data(
-        self, valid_user_id, valid_authentication_user_data_mfa_enabled, valid_role_assignments_data
-    ):
+    def valid_user_data(self):
         return {
-            "id": valid_user_id,
             "email": "john.doe@example.com",
             "isActive": True,
             "isVerified": False,
-            "authenticationCredentials": AuthenticationCredentials.Create(
-                **valid_authentication_user_data_mfa_enabled
-            ),
-            "roleAssignments": [
-                RoleAssignment.Create(**data) for data in valid_role_assignments_data
-            ],
+            "username": "testuser",
+            "passwordHash": "hashed_password",
+            "mfaEnabled": True,
+            "mfaSecret": "mfa_secret",
         }
 
     @pytest.fixture
-    def valid_database_user_data(self, valid_user_id):
+    def valid_database_user_data(self):
         return {
-            "id": valid_user_id,
+            "id": "423e4567-e89b-12d3-a456-426614174000",
             "email": "john.doe@example.com",
             "isActive": True,
             "isVerified": False,
@@ -311,14 +294,12 @@ class TestUser:
 
     def test_create_user(self, valid_user_data):
         user = User.Create(**valid_user_data)
-        assert user.id == UUID(valid_user_data["id"])
+        assert isinstance(user.id, UUID)
         assert user.email == valid_user_data["email"]
         assert user.isActive == valid_user_data["isActive"]
         assert user.isVerified == valid_user_data["isVerified"]
-        assert user.authenticationCredentials.id == valid_user_data["authenticationCredentials"].id
-        assert len(user.roleAssignments) == len(valid_user_data["roleAssignments"])
-        for ra, valid_ra in zip(user.roleAssignments, valid_user_data["roleAssignments"]):
-            assert ra.id == valid_ra.id
+        assert isinstance(user.authenticationCredentials.id, UUID)
+        assert len(user.roleAssignments) == 0
 
     def test_create_from_database(self, valid_database_user_data):
         user = User.FromDatabase(valid_database_user_data)
@@ -383,26 +364,29 @@ class TestUser:
     def test_add_role_assignment(self, valid_user_data):
         user = User.Create(**valid_user_data)
         new_role_assignment_data = {
-            "id": "323e4567-e89b-12d3-a456-426614174004",
             "userId": user.id,
             "roleId": "223e4567-e89b-12d3-a456-426614174005",
         }
         new_role_assignment = RoleAssignment.Create(**new_role_assignment_data)
         user.AddRoleAssignment(new_role_assignment)
-        assert len(user.roleAssignments) == len(valid_user_data["roleAssignments"]) + 1
+        assert len(user.roleAssignments) == 1
         assert any(ra.id == new_role_assignment.id for ra in user.roleAssignments)
 
-    def test_add_existing_role_assignment(self, valid_user_data):
+    def test_add_existing_role_assignment(self, valid_user_data, valid_role_assignments_data):
         user = User.Create(**valid_user_data)
+        for data in valid_role_assignments_data:
+            user.AddRoleAssignment(RoleAssignment.Create(**data))
         existing_role_assignment = user.roleAssignments[0]
         with pytest.raises(ValueError):
             user.AddRoleAssignment(existing_role_assignment)
 
-    def test_remove_role_assignment(self, valid_user_data):
+    def test_remove_role_assignment(self, valid_user_data, valid_role_assignments_data):
         user = User.Create(**valid_user_data)
+        for data in valid_role_assignments_data:
+            user.AddRoleAssignment(RoleAssignment.Create(**data))
         role_assignment_to_remove = user.roleAssignments[0]
         user.RemoveRoleAssignment(role_assignment_to_remove.id)
-        assert len(user.roleAssignments) == len(valid_user_data["roleAssignments"]) - 1
+        assert len(user.roleAssignments) == len(valid_role_assignments_data) - 1
         assert all(ra.id != role_assignment_to_remove.id for ra in user.roleAssignments)
 
     def test_remove_nonexistent_role_assignment(self, valid_user_data):

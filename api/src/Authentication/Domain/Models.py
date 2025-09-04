@@ -1,7 +1,7 @@
 import re
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
-from uuid import UUID
+from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 from src.Shared.Events.Models import EventEmitter
 
@@ -78,7 +78,6 @@ class AuthenticationCredentials(HistoryClass, EventEmitter):
     @classmethod
     def Create(
         cls,
-        id: UUID,
         userId: UUID,
         username: str,
         passwordHash: str,
@@ -90,6 +89,10 @@ class AuthenticationCredentials(HistoryClass, EventEmitter):
         """
 
         now = datetime.now(timezone.utc)
+
+        # Generate a new UUID for the credentials
+        id: UUID = uuid4()
+
         authenticationCredentials = cls(
             id=id,
             userId=userId,
@@ -109,7 +112,7 @@ class AuthenticationCredentials(HistoryClass, EventEmitter):
         return authenticationCredentials
 
     @classmethod
-    def FromDatabase(cls, data: dict) -> "AuthenticationCredentials":
+    def FromDatabase(cls, data: Dict[str, Any]) -> "AuthenticationCredentials":
         """
         Factory method to create an AuthenticationCredentials instance from database data.
         """
@@ -125,7 +128,7 @@ class AuthenticationCredentials(HistoryClass, EventEmitter):
             updatedAt=datetime.fromisoformat(data["updatedAt"]),
         )
 
-    def ToDict(self) -> dict:
+    def ToDict(self) -> Dict[str, Any]:
         """
         Serialize the AuthenticationCredentials instance to a dictionary.
         """
@@ -207,7 +210,6 @@ class Role(HistoryClass, EventEmitter):
     @classmethod
     def Create(
         cls,
-        id: UUID,
         name: str,
         description: Optional[str] = None,
     ) -> "Role":
@@ -216,6 +218,10 @@ class Role(HistoryClass, EventEmitter):
         """
 
         now = datetime.now(timezone.utc)
+
+        # Generate a new UUID for the role
+        id: UUID = uuid4()
+
         role = cls(
             id=id,
             name=name,
@@ -230,7 +236,7 @@ class Role(HistoryClass, EventEmitter):
         return role
 
     @classmethod
-    def FromDatabase(cls, data: dict) -> "Role":
+    def FromDatabase(cls, data: Dict[str, Any]) -> "Role":
         """
         Factory method to create a Role instance from database data.
         """
@@ -243,7 +249,7 @@ class Role(HistoryClass, EventEmitter):
             updatedAt=datetime.fromisoformat(data["updatedAt"]),
         )
 
-    def ToDict(self) -> dict:
+    def ToDict(self) -> Dict[str, Any]:
         """
         Serialize the Role instance to a dictionary.
         """
@@ -315,7 +321,6 @@ class RoleAssignment(HistoryClass):
     @classmethod
     def Create(
         cls,
-        id: UUID,
         userId: UUID,
         roleId: UUID,
     ) -> "RoleAssignment":
@@ -324,6 +329,10 @@ class RoleAssignment(HistoryClass):
         """
 
         now = datetime.now(timezone.utc)
+
+        # Generate a new UUID for the role assignment
+        id: UUID = uuid4()
+
         roleAssignment = cls(
             id=id,
             userId=userId,
@@ -335,7 +344,7 @@ class RoleAssignment(HistoryClass):
         return roleAssignment
 
     @classmethod
-    def FromDatabase(cls, data: dict) -> "RoleAssignment":
+    def FromDatabase(cls, data: Dict[str, Any]) -> "RoleAssignment":
         """
         Factory method to create a RoleAssignment instance from database data.
         """
@@ -348,7 +357,7 @@ class RoleAssignment(HistoryClass):
             updatedAt=datetime.fromisoformat(data["updatedAt"]),
         )
 
-    def ToDict(self) -> dict:
+    def ToDict(self) -> Dict[str, Any]:
         """
         Serialize the RoleAssignment instance to a dictionary.
         """
@@ -425,10 +434,11 @@ class User(HistoryClass, EventEmitter):
     @classmethod
     def Create(
         cls,
-        id: UUID,
         email: str,
-        authenticationCredentials: AuthenticationCredentials,
-        roleAssignments: Optional[list[RoleAssignment]] = None,
+        username: str,
+        passwordHash: str,
+        mfaEnabled: bool = False,
+        mfaSecret: Optional[str] = None,
         isActive: bool = True,
         isVerified: bool = False,
     ) -> "User":
@@ -437,13 +447,27 @@ class User(HistoryClass, EventEmitter):
         """
 
         now = datetime.now(timezone.utc)
+
+        # Generate a new UUID for the user
+        id: UUID = uuid4()
+
+        # Create authentication credentials
+        authenticationCredentials = AuthenticationCredentials.Create(
+            userId=id,
+            username=username,
+            passwordHash=passwordHash,
+            mfaEnabled=mfaEnabled,
+            mfaSecret=mfaSecret,
+        )
+
+        # Create the user instance
         user = cls(
             id=id,
             email=email,
             isActive=isActive,
             isVerified=isVerified,
             authenticationCredentials=authenticationCredentials,
-            roleAssignments=roleAssignments or [],
+            roleAssignments=[],
             createdAt=now,
             updatedAt=now,
         )
@@ -454,7 +478,7 @@ class User(HistoryClass, EventEmitter):
         return user
 
     @classmethod
-    def FromDatabase(cls, data: dict) -> "User":
+    def FromDatabase(cls, data: Dict[str, Any]) -> "User":
         """
         Factory method to create a User instance from database data.
         """
@@ -474,7 +498,7 @@ class User(HistoryClass, EventEmitter):
             updatedAt=datetime.fromisoformat(data["updatedAt"]),
         )
 
-    def ToDict(self) -> dict:
+    def ToDict(self) -> Dict[str, Any]:
         """
         Serialize the User instance to a dictionary.
         """
@@ -584,3 +608,11 @@ class User(HistoryClass, EventEmitter):
         self.roleAssignments = []
         # Emit event for clearing role assignments
         # self.EmitEvent(RoleAssignmentsCleared.FromModel(self))
+
+    @classmethod
+    def ToDicts(cls, users: List["User"]) -> List[Dict[str, Any]]:
+        """
+        Serialize a list of User instances to a list of dictionaries.
+        """
+
+        return [user.ToDict() for user in users]
