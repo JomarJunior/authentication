@@ -1,8 +1,8 @@
 from typing import Dict, Callable, List, Any
-from pydantic import ConfigDict
+from pydantic import BaseModel, Field
 
 
-class BaseEvent:
+class BaseEvent(BaseModel):
     """
     Base class for all events in the system.
     This class provides a foundation for creating event objects with a unique name
@@ -22,14 +22,7 @@ class BaseEvent:
         {BaseEvent('user_login')}
     """
 
-    def __init__(self, name: str):
-        """
-        Initialize the event with a name.
-
-        Args:
-            name (str): The name of the event.
-        """
-        self.name = name
+    name: str = Field(..., min_length=1, max_length=100)
 
     def __eq__(self, other: object) -> bool:
         """
@@ -166,7 +159,7 @@ class EventDispatcher:
                 subscriber(event)
 
 
-class EventEmitter:
+class EventEmitter(BaseModel):
     """
     Event emitter responsible for collecting and storing events that occur during execution.
 
@@ -178,15 +171,7 @@ class EventEmitter:
         events (List[BaseEvent]): List of events that have been emitted.
     """
 
-    # Pydantic model configuration, if needed
     events: List[BaseEvent] = []
-    modelConfig = ConfigDict(arbitrary_types_allowed=True)
-
-    def __init__(self):
-        """
-        Initialize the EventEmitter with an empty events list.
-        """
-        self.events: List[BaseEvent] = []
 
     def EmitEvent(self, event: BaseEvent):
         """

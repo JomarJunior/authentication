@@ -15,7 +15,7 @@ inlinevar-naming-style=camelCase
 good-names=src
 
 [MESSAGES CONTROL]
-disable=C0114,C0115,C0116
+disable=C0114,C0115,C0116,R0917,W0622
 
 [FORMAT]
 max-line-length=100

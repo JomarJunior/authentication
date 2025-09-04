@@ -1,3 +1,4 @@
+from typing import Any
 import pytest
 from unittest.mock import Mock, call
 from src.Shared.Events.Models import BaseEvent, EventDispatcher, EventEmitter
@@ -6,9 +7,8 @@ from src.Shared.Events.Models import BaseEvent, EventDispatcher, EventEmitter
 class MockEvent(BaseEvent):
     """Mock event class for testing purposes."""
 
-    def __init__(self, name="MockEvent", data=None):
-        super().__init__(name)
-        self.data = data
+    name: str = "MockEvent"
+    data: Any = None
 
 
 class TestEventDispatcher:
