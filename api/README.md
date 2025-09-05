@@ -5,6 +5,7 @@ SSO OIDC/OAuth2 Authentication Module To-Do List
 - [x] Implement User Authentication
 - [ ] Implement Authentication Code generation
 - [ ] Implement Token Generation and Validation
+- [ ] Implement Client Management
 - [ ] Implement Session Management
 - [ ] Implement Role Management
 - [ ] Implement Password Reset Functionality
