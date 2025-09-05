@@ -22,6 +22,10 @@ from src.Authentication.Infrastructure.Dependencies import AuthenticationDepende
 from src.Authentication.Infrastructure.Http.Routes import Routes as AuthenticationRoutes
 from src.Authentication.Infrastructure.Http.Controller import AuthenticationController
 
+# Session
+from src.Session.Infrastructure.Dependencies import SessionDependencies
+from src.Session.Infrastructure.Http.Routes import Routes as SessionRoutes
+from src.Session.Infrastructure.Http.Controller import SessionController
 
 # Load environment variables from .env file
 load_dotenv()
@@ -58,6 +62,7 @@ container.RegisterFactories(
 
 # Context dependencies
 AuthenticationDependencies.RegisterDependencies(container)
+SessionDependencies.RegisterDependencies(container)
 
 # Initialize FastAPI app
 app: FastAPI = FastAPI(title=appConfig.appName, version=appConfig.version)
@@ -68,6 +73,9 @@ apiV1Router: APIRouter = APIRouter(prefix="/api/v1")
 # Setup Routes
 AuthenticationRoutes.RegisterRoutes(
     router=apiV1Router, controller=container.Get(AuthenticationController.__name__)
+)
+SessionRoutes.RegisterRoutes(
+    router=apiV1Router, controller=container.Get(SessionController.__name__)
 )
 
 

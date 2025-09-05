@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from src.Authentication.Domain.Models import User, AuthenticationCode
+from src.Shared.Models import AuthenticationMethod
 
 
 class IUserRepository(ABC):
@@ -44,4 +45,51 @@ class IHashingService(ABC):
 
     @abstractmethod
     def Verify(self, plainText: str, hashed: str) -> bool:
+        pass
+
+
+class ISessionService(ABC):
+    @abstractmethod
+    def CreateSession(
+        self,
+        userId: UUID,
+        clientId: UUID,
+        scopes: List[str],
+        codeChallenge: str,
+        authenticationMethod: AuthenticationMethod,
+        authenticationCodeId: Optional[UUID],
+    ) -> UUID:
+        pass
+
+    @abstractmethod
+    def CreatePasswordSession(
+        self,
+        userId: UUID,
+        clientId: UUID,
+        scopes: List[str],
+        codeChallenge: str,
+        authenticationCodeId: Optional[UUID],
+    ) -> UUID:
+        pass
+
+    @abstractmethod
+    def CreateMFASession(
+        self,
+        userId: UUID,
+        clientId: UUID,
+        scopes: List[str],
+        codeChallenge: str,
+        authenticationCodeId: Optional[UUID],
+    ) -> UUID:
+        pass
+
+    @abstractmethod
+    def ValidateSession(
+        self,
+        sessionId: str,
+        requiredScopes: List[str],
+        clientId: str,
+        codeChallenge: str,
+        authenticationMethod: AuthenticationMethod,
+    ) -> None:
         pass

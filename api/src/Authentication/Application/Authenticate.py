@@ -4,6 +4,7 @@ from src.Authentication.Domain.Interfaces import (
     IUserRepository,
     IHashingService,
     IAuthCodeRepository,
+    ISessionService,
 )
 from src.Shared.Events.Models import EventDispatcher
 from src.Shared.Logging.Interfaces import ILogger
@@ -39,6 +40,7 @@ class AuthenticateHandler:
         authCodeRepository: IAuthCodeRepository,
         hashingService: IHashingService,
         authenticationCodeService: AuthenticationCodeService,
+        sessionService: ISessionService,
         eventDispatcher: EventDispatcher,
         logger: ILogger,
     ):
@@ -46,10 +48,11 @@ class AuthenticateHandler:
         self.authCodeRepository = authCodeRepository
         self.hashingService = hashingService
         self.authenticationCodeService = authenticationCodeService
+        self.sessionService = sessionService
         self.eventDispatcher = eventDispatcher
         self.logger = logger
 
-    def Handle(self, command: AuthenticateCommand) -> str:
+    def Handle(self, command: AuthenticateCommand) -> tuple[str, str]:
         # Find the user by username
         user = self.userRepository.FindByUsername(command.username)
         if not user:
@@ -70,6 +73,15 @@ class AuthenticateHandler:
             codeChallenge=command.codeChallenge,
         )
 
+        # Create a new session for the user
+        sessionId: UUID = self.sessionService.CreatePasswordSession(
+            userId=user.id,
+            clientId=UUID(command.clientId),
+            scopes=command.scopes,
+            codeChallenge=command.codeChallenge,
+            authenticationCodeId=authenticationCode.id,
+        )
+
         # Store the authentication code
         self.authCodeRepository.Save(authenticationCode)
 
@@ -77,4 +89,4 @@ class AuthenticateHandler:
         self.eventDispatcher.DispatchAll(authenticationCode.ReleaseEvents())
 
         self.logger.Info(f"User {user.id} authenticated successfully")
-        return authenticationCode.code
+        return authenticationCode.code, str(sessionId)

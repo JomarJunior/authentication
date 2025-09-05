@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from src.Shared.Enums import AuthenticationMethodEnum
 
 
 class HistoryClass(BaseModel):
@@ -33,3 +34,24 @@ class HistoryClass(BaseModel):
             return result
 
         return Wrapper
+
+
+class AuthenticationMethod(BaseModel):
+    value: AuthenticationMethodEnum = Field(...)
+    _levelMap = {
+        AuthenticationMethodEnum.PASSWORD: 1,
+        AuthenticationMethodEnum.MFA: 2,
+        AuthenticationMethodEnum.GOOGLE: 1,
+        AuthenticationMethodEnum.FACEBOOK: 1,
+        AuthenticationMethodEnum.GITHUB: 1,
+        AuthenticationMethodEnum.TWITTER: 1,
+    }
+
+    def __str__(self):
+        return self.value
+
+    def __eq__(self, other):
+        try:
+            return self._levelMap[self.value] == self._levelMap[other.value]
+        except (ValueError, KeyError, AttributeError):
+            return False
