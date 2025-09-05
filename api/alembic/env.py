@@ -7,6 +7,7 @@ from alembic import context
 from dotenv import load_dotenv
 from os import getenv
 
+load_dotenv(dotenv_path="../.env")
 load_dotenv()
 
 # this is the Alembic Config object, which provides

@@ -1,5 +1,5 @@
 [MASTER]
-ignore=venv
+ignore=venv,alembic,versions,migrations,__pycache__,.eggs,build,dist
 ignore-patterns=(.)*_test\.py,test_(.)*\.py
 module-naming-style=PascalCase
 const-naming-style=UPPER_CASE
@@ -12,10 +12,10 @@ variable-naming-style=camelCase
 class-attribute-naming-style=camelCase
 class-const-naming-style=UPPER_CASE
 inlinevar-naming-style=camelCase
-good-names=src
+good-names=src,main
 
 [MESSAGES CONTROL]
-disable=C0114,C0115,C0116,R0917,W0622, R0903
+disable=C0114,C0115,C0116,R0917,W0622,R0903,W0718
 
 [FORMAT]
 max-line-length=100

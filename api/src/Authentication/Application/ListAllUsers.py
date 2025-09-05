@@ -1,11 +1,11 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field, field_validator
 from src.Authentication.Domain.Interfaces import IUserRepository
 from src.Authentication.Domain.Models import User
 from src.Shared.Logging.Interfaces import ILogger
 
 
-class Command(BaseModel):
+class ListAllUsersCommand(BaseModel):
     sortBy: str = Field(default="id")
     sortOrder: str = Field(default="asc")
     limit: int = Field(default=10, ge=1, le=100)
@@ -28,12 +28,14 @@ class Command(BaseModel):
         return value
 
 
-class Handler:
+class ListAllUsersHandler:
     def __init__(self, userRepository: IUserRepository, logger: ILogger):
         self.userRepository = userRepository
         self.logger = logger
 
-    def Handle(self, command: Command) -> List[Dict[str, Any]]:
+    def Handle(self, command: Optional[ListAllUsersCommand] = None) -> List[Dict[str, Any]]:
+        command = command or ListAllUsersCommand()
+
         self.logger.Info(
             f"""Listing users sorted by {command.sortBy} in 
             {command.sortOrder} order, limit {command.limit}, offset {command.offset}"""

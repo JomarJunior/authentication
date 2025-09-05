@@ -29,9 +29,9 @@ class IUserRepository(ABC):
 
 class IHashingService(ABC):
     @abstractmethod
-    def Hash(self, plaintext: str) -> str:
+    def Hash(self, plainText: str) -> str:
         pass
 
     @abstractmethod
-    def Verify(self, plaintext: str, hashed: str) -> bool:
+    def Verify(self, plainText: str, hashed: str) -> bool:
         pass

@@ -118,7 +118,7 @@ class AuthenticationCredentials(HistoryClass, EventEmitter):
         """
 
         return cls(
-            id=UUID(data["id"]),
+            id=data["id"] if isinstance(data["id"], UUID) else UUID(data["id"]),
             userId=UUID(data["userId"]),
             username=data["username"],
             passwordHash=data["passwordHash"],
@@ -242,7 +242,7 @@ class Role(HistoryClass, EventEmitter):
         """
 
         return cls(
-            id=UUID(data["id"]),
+            id=data["id"] if isinstance(data["id"], UUID) else UUID(data["id"]),
             name=data["name"],
             description=data.get("description"),
             createdAt=datetime.fromisoformat(data["createdAt"]),
@@ -350,9 +350,9 @@ class RoleAssignment(HistoryClass):
         """
 
         return cls(
-            id=UUID(data["id"]),
-            userId=UUID(data["userId"]),
-            roleId=UUID(data["roleId"]),
+            id=data["id"] if isinstance(data["id"], UUID) else UUID(data["id"]),
+            userId=data["userId"] if isinstance(data["userId"], UUID) else UUID(data["userId"]),
+            roleId=data["roleId"] if isinstance(data["roleId"], UUID) else UUID(data["roleId"]),
             createdAt=datetime.fromisoformat(data["createdAt"]),
             updatedAt=datetime.fromisoformat(data["updatedAt"]),
         )
@@ -484,7 +484,7 @@ class User(HistoryClass, EventEmitter):
         """
 
         return cls(
-            id=UUID(data["id"]),
+            id=data["id"] if isinstance(data["id"], UUID) else UUID(data["id"]),
             email=data["email"],
             isActive=data["isActive"],
             isVerified=data["isVerified"],

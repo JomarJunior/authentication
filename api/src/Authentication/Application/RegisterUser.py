@@ -7,13 +7,13 @@ from src.Shared.Events.Models import EventDispatcher
 from src.Shared.Logging.Interfaces import ILogger
 
 
-class Command(BaseModel):
+class RegisterUserCommand(BaseModel):
     email: EmailStr
     username: str = Field(min_length=3, max_length=50)
     password: str = Field(min_length=8, max_length=128)
 
 
-class Handler:
+class RegisterUserHandler:
     def __init__(
         self,
         userRepository: IUserRepository,
@@ -28,7 +28,7 @@ class Handler:
         self.eventDispatcher = eventDispatcher
         self.logger = logger
 
-    def Handle(self, command: Command) -> UUID:
+    def Handle(self, command: RegisterUserCommand) -> UUID:
         # Validate
         self.uniquenessService.ValidateIsEmailUnique(command.email)
         self.uniquenessService.ValidateIsUsernameUnique(command.username)
