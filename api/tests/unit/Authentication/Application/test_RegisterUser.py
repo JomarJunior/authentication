@@ -6,7 +6,10 @@ import pytest
 from unittest.mock import Mock, MagicMock, patch
 from uuid import UUID, uuid4
 from pydantic import ValidationError
-from src.Authentication.Application.RegisterUser import Command, Handler
+from src.Authentication.Application.RegisterUser import (
+    RegisterUserCommand as Command,
+    RegisterUserHandler as Handler,
+)
 from src.Authentication.Domain.Models import User
 from src.Authentication.Domain.Interfaces import IHashingService, IUserRepository
 from src.Authentication.Domain.Sevices import UniquenessService

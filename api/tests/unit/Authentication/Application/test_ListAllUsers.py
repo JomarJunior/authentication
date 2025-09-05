@@ -5,7 +5,10 @@ Unit tests for ListAllUsers Command and Handler classes.
 import pytest
 from unittest.mock import Mock, MagicMock, patch
 from pydantic import ValidationError
-from src.Authentication.Application.ListAllUsers import Command, Handler
+from src.Authentication.Application.ListAllUsers import (
+    ListAllUsersCommand as Command,
+    ListAllUsersHandler as Handler,
+)
 from src.Authentication.Domain.Models import User
 from src.Authentication.Domain.Interfaces import IUserRepository
 from src.Shared.Logging.Interfaces import ILogger
