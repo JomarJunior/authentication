@@ -1,5 +1,6 @@
 from typing import Optional
-from fastapi import APIRouter, status
+from fastapi import APIRouter
+from src.Authentication.Application.Authenticate import AuthenticateCommand
 from src.Authentication.Infrastructure.Http.Controller import AuthenticationController
 from src.Authentication.Application.ListAllUsers import ListAllUsersCommand
 from src.Authentication.Application.RegisterUser import RegisterUserCommand
@@ -15,3 +16,7 @@ class Routes:
         @router.post("/users")
         async def RegisterUser(command: RegisterUserCommand):
             return controller.RegisterUser(command)
+
+        @router.post("/users/authenticate")
+        async def Authenticate(command: AuthenticateCommand):
+            return controller.Authenticate(command)
