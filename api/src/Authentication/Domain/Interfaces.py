@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from uuid import UUID
 
-from src.Authentication.Domain.Models import User
+from src.Authentication.Domain.Models import User, AuthenticationCode
 
 
 class IUserRepository(ABC):
@@ -24,6 +24,16 @@ class IUserRepository(ABC):
 
     @abstractmethod
     def Save(self, user: User) -> None:
+        pass
+
+
+class IAuthCodeRepository(ABC):
+    @abstractmethod
+    def FindByCode(self, code: str) -> Optional[AuthenticationCode]:
+        pass
+
+    @abstractmethod
+    def Save(self, authenticationCode: AuthenticationCode) -> None:
         pass
 
 

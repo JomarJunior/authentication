@@ -616,3 +616,71 @@ class User(HistoryClass, EventEmitter):
         """
 
         return [user.ToDict() for user in users]
+
+
+class AuthenticationCode(HistoryClass, EventEmitter):
+    id: UUID = Field(default_factory=UUID)
+    code: str = Field(..., min_length=10, max_length=100)
+    userId: UUID = Field(default_factory=UUID)
+    clientId: UUID = Field(default_factory=UUID)
+    scopes: List[str] = Field(default_factory=list)
+    expiresAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    codeChallenge: Optional[str] = None
+
+    @classmethod
+    def Create(
+        cls,
+        code: str,
+        userId: UUID,
+        clientId: UUID,
+        scopes: List[str],
+        expiresAt: datetime,
+        codeChallenge: Optional[str] = None,
+    ) -> "AuthenticationCode":
+        id: UUID = uuid4()
+
+        authenticationCode = cls(
+            id=id,
+            code=code,
+            userId=userId,
+            clientId=clientId,
+            scopes=scopes,
+            expiresAt=expiresAt,
+            codeChallenge=codeChallenge,
+            createdAt=datetime.now(timezone.utc),
+            updatedAt=datetime.now(timezone.utc),
+        )
+
+        # Emit event for creation if needed
+        # authenticationCode.EmitEvent(AuthenticationCodeCreated.FromModel(authenticationCode))
+
+        return authenticationCode
+
+    @classmethod
+    def FromDatabase(cls, data: Dict[str, Any]) -> "AuthenticationCode":
+        return cls(
+            id=data["id"] if isinstance(data["id"], UUID) else UUID(data["id"]),
+            code=data["code"],
+            userId=data["userId"] if isinstance(data["userId"], UUID) else UUID(data["userId"]),
+            clientId=(
+                data["clientId"] if isinstance(data["clientId"], UUID) else UUID(data["clientId"])
+            ),
+            scopes=data.get("scopes", []),
+            expiresAt=datetime.fromisoformat(data["expiresAt"]),
+            codeChallenge=data.get("codeChallenge"),
+        )
+
+    def ToDict(self) -> Dict[str, Any]:
+        return {
+            "id": str(self.id),
+            "code": self.code,
+            "userId": str(self.userId),
+            "clientId": str(self.clientId),
+            "scopes": self.scopes,
+            "expiresAt": self.expiresAt.isoformat(),  # pylint: disable=E1101
+            "codeChallenge": self.codeChallenge,
+        }
+
+    @classmethod
+    def ToDicts(cls, codes: List["AuthenticationCode"]) -> List[Dict[str, Any]]:
+        return [code.ToDict() for code in codes]

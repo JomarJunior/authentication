@@ -5,11 +5,12 @@ from sqlalchemy.orm import (
     Session as DatabaseSession,
     joinedload,
 )
-from src.Authentication.Domain.Interfaces import IUserRepository
-from src.Authentication.Domain.Models import User
+from src.Authentication.Domain.Interfaces import IUserRepository, IAuthCodeRepository
+from src.Authentication.Domain.Models import AuthenticationCode, User
 from src.Authentication.Infrastructure.Database.Models import (
     UserDatabaseModel,
     AuthenticationCredentialsDatabaseModel,
+    AuthenticationCodeDatabaseModel,
 )
 
 
@@ -84,6 +85,30 @@ class SqlUserRepository(IUserRepository):
         except IntegrityError as e:
             self.session.rollback()
             raise ValueError("User with given email or username already exists.") from e
+        except Exception as e:
+            self.session.rollback()
+            raise e
+
+
+class SqlAuthCodeRepository(IAuthCodeRepository):
+    def __init__(self, session: DatabaseSession):
+        self.session = session
+
+    def FindByCode(self, code: str) -> AuthenticationCode | None:
+        stmt = sa.select(AuthenticationCodeDatabaseModel).where(
+            AuthenticationCodeDatabaseModel.code == code
+        )
+        dbCode = self.session.execute(stmt).unique().scalar_one_or_none()
+        return dbCode.ToModel() if dbCode else None
+
+    def Save(self, authenticationCode: AuthenticationCode) -> None:
+        dbCode = AuthenticationCodeDatabaseModel.FromModel(authenticationCode)
+        try:
+            self.session.merge(dbCode)
+            self.session.commit()
+        except IntegrityError as e:
+            self.session.rollback()
+            raise ValueError("Authentication code already exists.") from e
         except Exception as e:
             self.session.rollback()
             raise e

@@ -30,6 +30,7 @@ class AppConfig(BaseModel):
     port: int = Field(8000, description="Port number for the application server")
     host: str = Field("localhost", description="Host name for the application server")
     logTarget: str = Field(..., description="Target for logging (e.g., file, console)")
+    authCodeExpiryMinutes: int = Field(5, description="Authentication code expiry time in minutes")
 
     @classmethod
     def FromEnv(cls):
@@ -45,6 +46,7 @@ class AppConfig(BaseModel):
             port=int(os.getenv("PORT", "8000")),
             host=os.getenv("HOST", "localhost"),
             logTarget=os.getenv("LOG_TARGET", "console"),
+            authCodeExpiryMinutes=int(os.getenv("AUTH_CODE_EXPIRY_MINUTES", "10")),
         )
 
     @field_validator("port")

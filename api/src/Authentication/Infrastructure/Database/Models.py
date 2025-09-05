@@ -2,10 +2,16 @@ from datetime import datetime
 from uuid import UUID
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, MappedColumn
 import sqlalchemy as sa
 
-from src.Authentication.Domain.Models import User, AuthenticationCredentials, RoleAssignment, Role
+from src.Authentication.Domain.Models import (
+    User,
+    AuthenticationCredentials,
+    RoleAssignment,
+    Role,
+    AuthenticationCode,
+)
 
 Base = declarative_base()
 
@@ -136,16 +142,16 @@ class RoleAssignmentDatabaseModel(Base):
 class UserDatabaseModel(Base):
     __tablename__ = "t_users"
 
-    id = mapped_column(
+    id: MappedColumn[UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, default=sa.text("gen_random_uuid()")
     )
-    email = mapped_column(sa.String, unique=True, nullable=False)
-    isActive = mapped_column(sa.Boolean, default=True)
-    isVerified = mapped_column(sa.Boolean, default=False)
-    createdAt = mapped_column(
+    email: MappedColumn[str] = mapped_column(sa.String, unique=True, nullable=False)
+    isActive: MappedColumn[bool] = mapped_column(sa.Boolean, default=True)
+    isVerified: MappedColumn[bool] = mapped_column(sa.Boolean, default=False)
+    createdAt: MappedColumn[datetime] = mapped_column(
         sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")
     )
-    updatedAt = mapped_column(
+    updatedAt: MappedColumn[datetime] = mapped_column(
         sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")
     )
 
@@ -184,4 +190,54 @@ class UserDatabaseModel(Base):
             "updatedAt": self.updatedAt.isoformat(),
             "authenticationCredentials": self.authenticationCredentials.ToDict(),
             "roleAssignments": [ra.ToDict() for ra in self.roleAssignments],
+        }
+
+
+class AuthenticationCodeDatabaseModel(Base):
+    __tablename__ = "t_authentication_codes"
+
+    id: MappedColumn[UUID] = mapped_column(
+        PG_UUID(as_uuid=True), primary_key=True, default=sa.text("gen_random_uuid()")
+    )
+    code: MappedColumn[str] = mapped_column(sa.String, unique=True, nullable=False)
+    userId: MappedColumn[UUID] = mapped_column(PG_UUID(as_uuid=True), sa.ForeignKey("t_users.id"))
+    clientId: MappedColumn[UUID] = mapped_column(PG_UUID(as_uuid=True), nullable=False)
+    scopes: MappedColumn[str] = mapped_column(sa.String, nullable=True)  # Comma-separated scopes
+    codeChallenge: MappedColumn[str] = mapped_column(sa.String, nullable=True)
+    expiresAt: MappedColumn[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)
+    createdAt: MappedColumn[datetime] = mapped_column(
+        sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")
+    )
+    updatedAt: MappedColumn[datetime] = mapped_column(
+        sa.DateTime(timezone=True), nullable=False, server_default=sa.text("now()")
+    )
+
+    @classmethod
+    def FromModel(cls, model: AuthenticationCode):
+        return cls(
+            id=model.id,
+            code=model.code,
+            userId=model.userId,
+            clientId=model.clientId,
+            scopes=",".join(model.scopes) if model.scopes else None,
+            codeChallenge=model.codeChallenge,
+            expiresAt=model.expiresAt,
+            createdAt=model.createdAt,
+            updatedAt=model.updatedAt,
+        )
+
+    def ToModel(self) -> AuthenticationCode:
+        return AuthenticationCode.FromDatabase(self.ToDict())
+
+    def ToDict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "code": self.code,
+            "userId": str(self.userId),
+            "clientId": str(self.clientId),
+            "scopes": self.scopes.split(",") if self.scopes else [],
+            "codeChallenge": self.codeChallenge,
+            "expiresAt": self.expiresAt.isoformat(),
+            "createdAt": self.createdAt.isoformat(),
+            "updatedAt": self.updatedAt.isoformat(),
         }

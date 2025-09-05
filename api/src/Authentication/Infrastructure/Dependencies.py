@@ -1,9 +1,17 @@
 from sqlalchemy.orm import Session as DatabaseSession
+from src.Shared.Config.AppConfig import AppConfig
 from src.Shared.DependencyInjection.Container import Container
-from src.Authentication.Domain.Interfaces import IUserRepository, IHashingService
-from src.Authentication.Domain.Sevices import UniquenessService
+from src.Authentication.Domain.Interfaces import (
+    IUserRepository,
+    IHashingService,
+    IAuthCodeRepository,
+)
+from src.Authentication.Domain.Sevices import AuthenticationCodeService, UniquenessService
 from src.Authentication.Infrastructure.Hashing import BcryptHashingService
-from src.Authentication.Infrastructure.Database.SqlRepositories import SqlUserRepository
+from src.Authentication.Infrastructure.Database.SqlRepositories import (
+    SqlUserRepository,
+    SqlAuthCodeRepository,
+)
 from src.Authentication.Infrastructure.Http.Controller import AuthenticationController
 from src.Authentication.Application.ListAllUsers import ListAllUsersHandler
 from src.Authentication.Application.RegisterUser import RegisterUserHandler
@@ -19,6 +27,9 @@ class AuthenticationDependencies:
             {
                 # Repositories
                 IUserRepository.__name__: lambda container: SqlUserRepository(
+                    session=container.Get(DatabaseSession.__name__)
+                ),
+                IAuthCodeRepository.__name__: lambda container: SqlAuthCodeRepository(
                     session=container.Get(DatabaseSession.__name__)
                 ),
                 # Services
@@ -39,7 +50,11 @@ class AuthenticationDependencies:
                 ),
                 AuthenticateHandler.__name__: lambda container: AuthenticateHandler(
                     userRepository=container.Get(IUserRepository.__name__),
+                    authCodeRepository=container.Get(IAuthCodeRepository.__name__),
                     hashingService=container.Get(IHashingService.__name__),
+                    authenticationCodeService=AuthenticationCodeService(
+                        appConfig=container.Get(AppConfig.__name__),
+                    ),
                     eventDispatcher=container.Get(EventDispatcher.__name__),
                     logger=container.Get(ILogger.__name__),
                 ),
